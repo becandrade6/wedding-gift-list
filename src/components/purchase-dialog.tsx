@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Loader } from 'lucide-react';
 import type { Gift } from '@/types';
 
 interface PurchaseDialogProps {
@@ -22,7 +22,7 @@ interface PurchaseDialogProps {
     buyer_surname: string;
     home_delivery: boolean;
     estimated_delivery_date?: Date;
-  }) => void;
+  }) => Promise<void>;
 }
 
 export function PurchaseDialog({ gift, open, onClose, onConfirm }: PurchaseDialogProps) {
@@ -30,6 +30,7 @@ export function PurchaseDialog({ gift, open, onClose, onConfirm }: PurchaseDialo
   const [buyerSurname, setBuyerSurname] = React.useState('');
   const [homeDelivery, setHomeDelivery] = React.useState(false);
   const [estimatedDeliveryDate, setEstimatedDeliveryDate] = React.useState<Date>();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   React.useEffect(() => {
     if (open) {
@@ -40,17 +41,22 @@ export function PurchaseDialog({ gift, open, onClose, onConfirm }: PurchaseDialo
     }
   }, [open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!gift) return;
 
-    onConfirm({
-      gift_id: gift.id,
-      buyer_name: buyerName,
-      buyer_surname: buyerSurname,
-      home_delivery: homeDelivery,
-      estimated_delivery_date: homeDelivery ? estimatedDeliveryDate : undefined,
-    });
+    setIsSubmitting(true);
+    try {
+      await onConfirm({
+        gift_id: gift.id,
+        buyer_name: buyerName,
+        buyer_surname: buyerSurname,
+        home_delivery: homeDelivery,
+        estimated_delivery_date: homeDelivery ? estimatedDeliveryDate : undefined,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!gift) return null;
@@ -74,6 +80,7 @@ export function PurchaseDialog({ gift, open, onClose, onConfirm }: PurchaseDialo
               value={buyerName}
               onChange={(e) => setBuyerName(e.target.value)}
               required
+              disabled={isSubmitting}
             />
           </div>
 
@@ -84,6 +91,7 @@ export function PurchaseDialog({ gift, open, onClose, onConfirm }: PurchaseDialo
               value={buyerSurname}
               onChange={(e) => setBuyerSurname(e.target.value)}
               required
+              disabled={isSubmitting}
             />
           </div>
 
@@ -92,6 +100,7 @@ export function PurchaseDialog({ gift, open, onClose, onConfirm }: PurchaseDialo
               id="home_delivery"
               checked={homeDelivery}
               onCheckedChange={(checked) => setHomeDelivery(checked as boolean)}
+              disabled={isSubmitting}
             />
             <Label htmlFor="home_delivery" className="text-sm font-normal">
               Será entregue na casa dos noivos
@@ -109,6 +118,7 @@ export function PurchaseDialog({ gift, open, onClose, onConfirm }: PurchaseDialo
                       "justify-start text-left font-normal",
                       !estimatedDeliveryDate && "text-muted-foreground"
                     )}
+                    disabled={isSubmitting}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {estimatedDeliveryDate ? (
@@ -133,10 +143,27 @@ export function PurchaseDialog({ gift, open, onClose, onConfirm }: PurchaseDialo
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button type="submit">Confirmar Compra</Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Confirmando...
+                </>
+              ) : (
+                'Confirmar Compra'
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

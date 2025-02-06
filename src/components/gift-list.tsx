@@ -30,9 +30,12 @@ export function GiftList({ gifts: initialGifts }: GiftListProps) {
     return Array.from(uniqueStores).sort();
   }, [gifts]);
 
-  // Filter gifts based on selected filters
+  // Filter gifts based on selected filters and availability
   const filteredGifts = useMemo(() => {
     return gifts.filter(gift => {
+      // Filter out purchased gifts
+      if (gift.purchased) return false;
+
       // Name filter
       const nameMatch = gift.name.toLowerCase().includes(nameFilter.toLowerCase());
 
@@ -80,7 +83,6 @@ export function GiftList({ gifts: initialGifts }: GiftListProps) {
   }) => {
     const supabase = createClient();
 
-    // Start a transaction (in Supabase we simulate this with multiple operations)
     try {
       // 1. Update the gift as purchased
       const { error: giftError } = await supabase
@@ -97,6 +99,31 @@ export function GiftList({ gifts: initialGifts }: GiftListProps) {
 
       if (purchaseError) throw purchaseError;
 
+      // 3. Send confirmation email
+      const gift = gifts.find(g => g.id === data.gift_id);
+      if (!gift) throw new Error('Gift not found');
+
+      const emailResponse = await fetch('/api/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          giftName: gift.name,
+          buyerName: data.buyer_name,
+          buyerSurname: data.buyer_surname,
+          homeDelivery: data.home_delivery,
+          estimatedDeliveryDate: data.estimated_delivery_date,
+          price: gift.price
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        console.error('Failed to send email notification');
+        // Note: We don't throw here because the purchase was successful
+        // The email failure shouldn't affect the user experience
+      }
+
       // Update local state
       setGifts(gifts.map(g =>
         g.id === data.gift_id ? { ...g, purchased: true } : g
@@ -105,8 +132,6 @@ export function GiftList({ gifts: initialGifts }: GiftListProps) {
       // Close the dialog
       setDialogOpen(false);
       setSelectedGift(null);
-
-      // TODO: Send email notification (will be implemented later)
 
     } catch (error) {
       console.error('Error recording purchase:', error);
@@ -130,9 +155,20 @@ export function GiftList({ gifts: initialGifts }: GiftListProps) {
 
       {filteredGifts.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">
-            Nenhum presente encontrado com os filtros selecionados.
-          </p>
+          {gifts.every(gift => gift.purchased) ? (
+            <div className="space-y-2">
+              <p className="text-2xl font-dancing-script text-primary">
+                Todos os presentes já foram comprados!
+              </p>
+              <p className="text-xl">
+                Nossa casa estará maravilhosa para te receber em breve 😊
+              </p>
+            </div>
+          ) : (
+            <p className="text-muted-foreground">
+              Nenhum presente encontrado com os filtros selecionados.
+            </p>
+          )}
         </div>
       ) : (
         <>

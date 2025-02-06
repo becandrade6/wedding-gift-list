@@ -25,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import AdminFilters from '@/components/admin-filters';
 
 export default function AdminPage() {
   const [gifts, setGifts] = React.useState<Gift[]>([]);
@@ -35,10 +36,16 @@ export default function AdminPage() {
 
   const supabase = createClient();
 
+  const [nameFilter, setNameFilter] = React.useState('');
+  const [priceRange, setPriceRange] = React.useState('all');
+  const [storeFilter, setStoreFilter] = React.useState('all');
+  const [statusFilter, setStatusFilter] = React.useState('all');
+
   const fetchGifts = React.useCallback(async () => {
     const { data } = await supabase
       .from('gifts')
       .select('*')
+      .order('purchased', { ascending: true })
       .order('created_at', { ascending: true });
 
     setGifts(data || []);
@@ -47,6 +54,42 @@ export default function AdminPage() {
   React.useEffect(() => {
     fetchGifts();
   }, [fetchGifts]);
+
+  // Get unique stores for filter dropdown
+  const stores = React.useMemo(() => {
+    const uniqueStores = new Set(gifts.map(gift => gift.store));
+    return Array.from(uniqueStores).sort();
+  }, [gifts]);
+
+  // Filter and sort gifts
+  const filteredGifts = React.useMemo(() => {
+    return gifts.filter(gift => {
+      // Name filter
+      const nameMatch = gift.name.toLowerCase().includes(nameFilter.toLowerCase());
+
+      // Store filter
+      const storeMatch = storeFilter === 'all' || gift.store === storeFilter;
+
+      // Price range filter
+      let priceMatch = true;
+      if (priceRange !== 'all') {
+        if (priceRange === '500-plus') {
+          priceMatch = gift.price >= 500;
+        } else {
+          const [min, max] = priceRange.split('-').map(Number);
+          priceMatch = gift.price >= min && gift.price <= max;
+        }
+      }
+
+      // Status filter
+      let statusMatch = true;
+      if (statusFilter !== 'all') {
+        statusMatch = statusFilter === 'available' ? !gift.purchased : gift.purchased;
+      }
+
+      return nameMatch && storeMatch && priceMatch && statusMatch;
+    });
+  }, [gifts, nameFilter, priceRange, storeFilter, statusFilter]);
 
   const handleAddEdit = async (data: Omit<Gift, 'id' | 'purchased'>) => {
     if (selectedGift) {
@@ -112,6 +155,19 @@ export default function AdminPage() {
             </Button>
           </div>
 
+          <AdminFilters
+            nameFilter={nameFilter}
+            onNameFilterChange={setNameFilter}
+            priceRange={priceRange}
+            onPriceRangeChange={setPriceRange}
+            storeFilter={storeFilter}
+            onStoreFilterChange={setStoreFilter}
+            stores={stores}
+            showStatusFilter={true}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+          />
+
           <div className="rounded-md border bg-card">
             <Table>
               <TableHeader>
@@ -124,7 +180,7 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {gifts.map((gift) => (
+                {filteredGifts.map((gift) => (
                   <TableRow key={gift.id}>
                     <TableCell className="font-medium">{gift.name}</TableCell>
                     <TableCell>{gift.store}</TableCell>
@@ -170,10 +226,10 @@ export default function AdminPage() {
                   </TableRow>
                 ))}
 
-                {gifts.length === 0 && (
+                {filteredGifts.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                      Nenhum presente cadastrado ainda.
+                      Nenhum presente cadastrado ainda com esses filtros.
                     </TableCell>
                   </TableRow>
                 )}
