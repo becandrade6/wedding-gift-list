@@ -17,6 +17,97 @@ const supabase = createClient(
 
 const gifts = [
   {
+    name: "Aspirador de pó (127V)",
+    link: "https://www.amazon.com.br/dp/B09NCKBNWG",
+    price: 399.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Conjunto Assadeiras Redondas",
+    link: "https://www.mercadolivre.com.br/conjunto-assadeiras-redondas-3-pecas-asj/p/MLB27483828",
+    price: 129.90,
+    store: "Mercado Livre",
+    purchased: false
+  },
+  {
+    name: "Conjunto Assadeiras Antiaderente",
+    link: "https://www.amazon.com.br/dp/B0BR667K3X",
+    price: 159.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Conjunto De Saladeiras",
+    link: "https://www.amazon.com.br/dp/B0778WCH7P",
+    price: 179.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Conjunto com 6 Bowl (branco)",
+    link: "https://www.amazon.com.br/dp/B09WNKHG4M",
+    price: 149.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Taças para sobremesa",
+    link: "https://www.amazon.com.br/dp/B0CNB9924Z",
+    price: 139.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Conjunto c/ 6 xícaras de café",
+    link: "https://www.amazon.com.br/dp/B09WNM26JC",
+    price: 129.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Dispenser 4 em 1",
+    link: "https://shopee.com.br/product/1106687470/23793614644",
+    price: 89.90,
+    store: "Shopee",
+    purchased: false
+  },
+  {
+    name: "Fruteira",
+    link: "https://www.amazon.com.br/dp/B096MR8M35",
+    price: 119.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Garrafa Térmica",
+    link: "https://www.amazon.com.br/dp/B0CJYHH7PC",
+    price: 99.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Jogo de Cama Casal Queen (azul)",
+    link: "https://www.amazon.com.br/dp/B0CVQY4GX9",
+    price: 299.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Jogo de Cama Casal Queen (branco)",
+    link: "https://www.amazon.com.br/dp/B0CVQWYPDN",
+    price: 299.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
+    name: "Jogo de Cama Casal Queen (cinza)",
+    link: "https://www.amazon.com.br/dp/B0CVQX2DR8",
+    price: 299.90,
+    store: "Amazon",
+    purchased: false
+  },
+  {
     name: "Jogo de Panelas Tramontina Antiaderente 10 peças",
     link: "https://www.magazineluiza.com.br/jogo-de-panelas-tramontina-antiaderente-10-pecas/p/144175900/ud/jopa/",
     price: 449.90,

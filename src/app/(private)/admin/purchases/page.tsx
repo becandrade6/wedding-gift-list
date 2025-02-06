@@ -137,6 +137,7 @@ export default function PurchasesPage() {
       setPurchases(purchases.filter(p => p.id !== giftToDelete.id));
       setGiftToDelete(null);
       setIsDeleteDialogOpen(false);
+      setIsDeleting(false);
     } catch (error) {
       console.error('Error deleting purchase:', error);
     }
