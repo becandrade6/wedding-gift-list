@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await resend.emails.send({
       from: 'Lista de Presentes <onboarding@resend.dev>', // Update this with your verified domain
-      to: ['Kikecoutinho@yahoo.com.br','Linopaloma00@gmail.com'], // Update with the couple's email
+      to: ['bernardocandrade6@gmail.com'], // Update with the couple's email
       subject: 'Novo Presente Comprado! 🎁',
       html: `
         <h2>Um presente foi comprado da sua lista!</h2>
