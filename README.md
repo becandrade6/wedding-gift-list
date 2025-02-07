@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Aplicação de Lista de Presentes de Casamento
 
-## Getting Started
+Uma aplicação web moderna projetada para ajudar na gestão de listas de presentes de casamento, facilitando a coordenação entre os noivos e seus convidados. Este projeto foi criado para ajudar meus amigos que estão se casando a gerenciar seus presentes de casamento de forma mais eficiente.
 
-First, run the development server:
+## 🎯 Objetivo
 
+O principal objetivo deste projeto é fornecer uma plataforma amigável onde:
+- Os convidados podem facilmente navegar e selecionar presentes de casamento
+- Os noivos podem gerenciar sua lista de presentes de forma efetiva
+- A comunicação entre convidados e o casal sobre os presentes é simplificada
+- O processo de entrega de presentes é organizado e transparente
+
+## ✨ Principais Funcionalidades
+
+### Para Convidados
+- Navegar pelos presentes disponíveis sem necessidade de login
+- Filtrar presentes por nome, loja ou valor
+- Marcar presentes como comprados
+- Fornecer informações de entrega
+- Links diretos para comprar presentes nas lojas
+
+### Para os Noivos (Admin)
+- Login seguro de administrador
+- Adicionar, editar e remover presentes
+- Acompanhar status dos presentes
+- Receber notificações por email quando presentes são comprados
+- Gerenciar lista de presentes de forma eficiente
+
+## 🛠 Tecnologias Utilizadas
+
+- **Next.js**: Framework React para aplicações em produção
+- **Supabase**: Backend as a Service (BaaS) para:
+  - Autenticação
+  - Banco de dados
+  - Atualizações em tempo real
+- **Shadcn/ui**: Componentes UI de alta qualidade
+- **Tailwind CSS**: Framework CSS baseado em utilitários
+- **TypeScript**: Tipagem estática para melhor experiência de desenvolvimento
+- **Serviço de Email - [Resend](https://resend.com/)**: Facil integração em minutos e serviço ótimo
+
+## 🚀 Como Começar
+
+### Pré-requisitos
+- Node.js (v18 ou superior)
+- npm ou yarn
+- Git
+
+### Instalação
+
+1. Clone o repositório:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/seunome/lista-presentes-casamento.git
+cd lista-presentes-casamento
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Instale as dependências:
+```bash
+pnpm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Configure as variáveis de ambiente:
+Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Configuração do Supabase
+NEXT_PUBLIC_SUPABASE_URL=sua_url_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima_supabase
 
-## Learn More
+# Configuração de Email (usando Resend)
+RESEND_API_KEY=sua_chave_do_resend
 
-To learn more about Next.js, take a look at the following resources:
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Inicie o servidor de desenvolvimento:
+```bash
+npm run dev
+# ou
+yarn dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 
-## Deploy on Vercel
+## 📦 Esquema do Banco de Dados
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A aplicação utiliza as seguintes tabelas principais no Supabase:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```sql
+-- Tabela de presentes
+create table presentes (
+  id uuid default uuid_generate_v4() primary key,
+  nome text not null,
+  descricao text,
+  preco decimal(10,2),
+  nome_loja text,
+  url_loja text,
+  url_imagem text,
+  comprado boolean default false,
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+-- Tabela de compras
+create table compras (
+  id uuid default uuid_generate_v4() primary key,
+  presente_id uuid references presentes(id),
+  nome_comprador text not null,
+  sobrenome_comprador text not null,
+  entrega_para_casal boolean default false,
+  data_estimada_entrega date,
+  created_at timestamp with time zone default timezone('utc'::text, now())
+);
+```
+
+## 🔒 Considerações de Segurança
+
+- Acesso administrativo é restrito a emails específicos
+- Interações dos convidados são monitoradas para prevenir abusos
+- Limitação de taxa implementada nas rotas da API
+- Validação de formulários implementada tanto no cliente quanto no servidor
+
+## 🤝 Contribuindo
+
+Sinta-se à vontade para contribuir com este projeto. Você pode:
+1. Fazer um fork do repositório
+2. Criar uma nova branch
+3. Fazer suas alterações
+4. Enviar um pull request
+
+## 📝 Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo LICENSE para detalhes.
