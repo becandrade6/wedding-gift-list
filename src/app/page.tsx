@@ -1,7 +1,10 @@
 import { createClient } from '@/utils/supabase/server';
+import { Card, CardContent } from "@/components/ui/card";
 import SiteHeader from '@/components/site-header';
 import GiftList from '@/components/gift-list';
 import type { Gift } from '@/types';
+import { ChevronDown, MapPin } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 async function getGifts() {
   const supabase = await createClient();
@@ -34,15 +37,45 @@ export default async function Home() {
               Escolha um presente para nos ajudar a construir nosso novo lar.
               Sua presença e carinho são os maiores presentes que poderíamos receber.
             </p>
-            <div className="mt-6 p-4 sm:p-6 bg-primary/5 rounded-lg max-w-2xl mx-auto">
-              <p className="text-sm sm:text-base text-muted-foreground">
-                <span className="font-medium">⚠️ Observação:</span> Caso seja da preferência, os presentes podem ser entregues no endereço:
-              </p>
-              <p className="text-base sm:text-lg font-medium mt-2">
-                Rua João Surerus, 101, Grama, Juiz de Fora
-              </p>
+
+            <div className="mt-8 max-w-2xl mx-auto">
+              <Card className="bg-primary/5 border-none">
+                <CardContent className="pt-6">
+                  <p className="text-sm sm:text-base text-muted-foreground mb-4">
+                    <span className="font-medium">⚠️ Observação:</span> Caso seja da preferência, os presentes podem ser entregues no endereço:
+                  </p>
+
+                  <Collapsible className="w-full">
+                    <CollapsibleTrigger className="flex items-center justify-center w-full group">
+                      <div className="flex items-center space-x-2 text-primary">
+                        <MapPin className="h-5 w-5" />
+                        <span className="font-medium">Ver endereço para entrega</span>
+                        <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </div>
+                    </CollapsibleTrigger>
+
+                    <CollapsibleContent className="mt-4">
+                      <div className="text-center space-y-2 py-4 border-t border-primary/10">
+                        <p className="text-base font-medium">
+                          Rua João Surerus, 101
+                        </p>
+                        <p className="text-base font-medium">
+                          Nova Gramado Village, Grama
+                        </p>
+                        <p className="text-base font-medium">
+                          Juiz de Fora - MG
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          CEP: 36047-610
+                        </p>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </CardContent>
+              </Card>
             </div>
           </div>
+
           <div>
             <GiftList gifts={gifts} />
           </div>
