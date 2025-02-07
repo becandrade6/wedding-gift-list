@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Gift } from '@/types';
 import GiftCard from './gift-card';
 import GiftFilters from './gift-filters';
@@ -8,6 +8,7 @@ import PurchaseDialog from './purchase-dialog';
 import { Button } from './ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface GiftListProps {
   gifts: Gift[];
@@ -23,6 +24,32 @@ export function GiftList({ gifts: initialGifts }: GiftListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedGift, setSelectedGift] = useState<Gift | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const { toast } = useToast();
+
+  // Polling para atualizar a lista de presentes
+  useEffect(() => {
+    const fetchGifts = async () => {
+      const supabase = createClient();
+      const { data: updatedGifts, error } = await supabase
+        .from('gifts')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (!error && updatedGifts) {
+        setGifts(updatedGifts);
+      }
+    };
+
+    // Atualiza imediatamente ao montar
+    fetchGifts();
+
+    // Configura o intervalo de polling (5 segundos)
+    const interval = setInterval(fetchGifts, 2500);
+
+    // Limpa o intervalo ao desmontar
+    return () => clearInterval(interval);
+  }, []);
 
   // Get unique stores for filter dropdown
   const stores = useMemo(() => {
@@ -84,30 +111,52 @@ export function GiftList({ gifts: initialGifts }: GiftListProps) {
     const supabase = createClient();
 
     try {
-      // 1. Update the gift as purchased
-      const { error: giftError } = await supabase
+      // Verifica se o presente ainda está disponível
+      const { data: currentGift, error: checkError } = await supabase
+        .from('gifts')
+        .select('purchased')
+        .eq('id', data.gift_id)
+        .single();
+
+      if (checkError || !currentGift) {
+        throw new Error('Erro ao verificar disponibilidade do presente');
+      }
+
+      if (currentGift.purchased) {
+        toast({
+          title: "Presente indisponível",
+          description: "Desculpe, este presente já foi escolhido por outra pessoa.",
+          variant: "destructive",
+        });
+        setDialogOpen(false);
+        return;
+      }
+
+      // Atualiza o presente como comprado
+      const { error: updateError } = await supabase
         .from('gifts')
         .update({ purchased: true })
         .eq('id', data.gift_id);
 
-      if (giftError) throw giftError;
+      if (updateError) throw updateError;
 
-      // 2. Create the purchase record
+      // Registra a compra
       const { error: purchaseError } = await supabase
         .from('purchases')
-        .insert([data]);
+        .insert([{
+          ...data,
+          created_at: new Date().toISOString()
+        }]);
 
       if (purchaseError) throw purchaseError;
 
-      // 3. Send confirmation email
+      // Envia o email de confirmação
       const gift = gifts.find(g => g.id === data.gift_id);
-      if (!gift) throw new Error('Gift not found');
+      if (!gift) throw new Error('Presente não encontrado');
 
-      const emailResponse = await fetch('/api/send', {
+      await fetch('/api/send', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           giftName: gift.name,
           buyerName: data.buyer_name,
@@ -118,24 +167,21 @@ export function GiftList({ gifts: initialGifts }: GiftListProps) {
         }),
       });
 
-      if (!emailResponse.ok) {
-        console.error('Failed to send email notification');
-        // Note: We don't throw here because the purchase was successful
-        // The email failure shouldn't affect the user experience
-      }
+      toast({
+        title: "Presente reservado com sucesso!",
+        description: "Obrigado por sua contribuição para nosso novo lar.",
+      });
 
-      // Update local state
-      setGifts(gifts.map(g =>
-        g.id === data.gift_id ? { ...g, purchased: true } : g
-      ));
-
-      // Close the dialog
       setDialogOpen(false);
       setSelectedGift(null);
 
     } catch (error) {
-      console.error('Error recording purchase:', error);
-      // Here you might want to show an error message to the user
+      console.error('Erro ao processar compra:', error);
+      toast({
+        title: "Erro ao reservar presente",
+        description: "Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
