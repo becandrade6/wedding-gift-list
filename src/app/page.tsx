@@ -5,6 +5,7 @@ import GiftList from '@/components/gift-list';
 import type { Gift } from '@/types';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import RSVPSection from '@/components/rsvp-section';
 
 async function getGifts() {
   const supabase = await createClient();
@@ -29,6 +30,7 @@ export default async function Home() {
       <SiteHeader />
       <main className="flex-1">
         <section className="container max-w-7xl mx-auto py-10">
+          <RSVPSection />
           <div className="text-center space-y-6 mb-12 px-4 sm:px-6">
             <h1 className="font-dancing-script text-4xl sm:text-5xl md:text-6xl leading-tight">
               Nossa Lista de Presentes

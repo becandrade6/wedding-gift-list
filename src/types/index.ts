@@ -15,3 +15,17 @@ export type Purchase = {
   home_delivery: boolean;
   estimated_delivery_date?: Date;
 };
+
+export interface RSVP {
+  id: string;
+  name: string;
+  will_attend: boolean;
+  email: string;
+  phone: string;
+  num_adults: number;
+  num_children: number;
+  additional_adults: string[];
+  children_names: string[];
+  observations: string;
+  created_at: string;
+}

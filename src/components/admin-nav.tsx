@@ -3,17 +3,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
-import { Gift, ShoppingBag, LogOut } from 'lucide-react';
-//import { createClient } from '@/utils/supabase/client';
+import { Gift, ShoppingBag, Users, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export function AdminNav() {
+export default function AdminNav() {
   const pathname = usePathname();
   const router = useRouter();
-  //const supabase = createClient();
 
   const handleLogout = async () => {
-    //await supabase.auth.signOut();
     router.push('/');
   };
 
@@ -44,6 +41,18 @@ export function AdminNav() {
             Presentes Comprados
           </Button>
         </Link>
+        <Link
+          href="/admin/rsvp"
+          className={cn(
+            "text-sm font-medium transition-colors hover:text-primary",
+            pathname === "/admin/rsvp" ? "text-primary" : "text-muted-foreground"
+          )}
+        >
+          <Button variant="ghost" className="w-full justify-start">
+            <Users className="mr-2 h-4 w-4" />
+            Confirmações de Presença
+          </Button>
+        </Link>
       </nav>
       <Button variant="ghost" onClick={handleLogout} className="text-red-500 hover:text-red-600">
         <LogOut className="mr-2 h-4 w-4" />
@@ -52,5 +61,3 @@ export function AdminNav() {
     </div>
   );
 }
-
-export default AdminNav;
