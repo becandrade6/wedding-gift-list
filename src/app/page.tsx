@@ -30,7 +30,6 @@ export default async function Home() {
       <SiteHeader />
       <main className="flex-1">
         <section className="container max-w-7xl mx-auto py-10">
-          <RSVPSection />
           <div className="text-center space-y-6 mb-12 px-4 sm:px-6">
             <h1 className="font-dancing-script text-4xl sm:text-5xl md:text-6xl leading-tight">
               Nossa Lista de Presentes
