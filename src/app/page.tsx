@@ -5,7 +5,7 @@ import GiftList from '@/components/gift-list';
 import type { Gift } from '@/types';
 import { ChevronDown, MapPin } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import RSVPSection from '@/components/rsvp-section';
+//import RSVPSection from '@/components/rsvp-section';
 
 async function getGifts() {
   const supabase = await createClient();
